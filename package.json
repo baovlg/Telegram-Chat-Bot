@@ -2,7 +2,7 @@
   "name": "telegram-chat-bot",
   "version": "0.1.0",
   "description": "Telegram Chat Bot",
-  "main": "bot.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -13,7 +13,10 @@
   "keywords": [
     "Telegram",
     "chat",
-    "bot"
+    "bot",
+    "NodeJS",
+    "Covid",
+    "2020"
   ],
   "author": "vlgbao97",
   "license": "ISC",
