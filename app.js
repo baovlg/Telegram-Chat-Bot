@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 // const http = require('http');
 // const server = http.createServer();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 // Config BodyParser to process request POST and PUT to easy
 const bodyParser = require('body-parser');
@@ -28,16 +28,6 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   bot = new TelegramBot(token, { polling: true });
 }
-
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-
-  // Pass to next layer of middleware
-  next();
-});
 
 // Start the server
 const server = app.listen(port, (error) => {
