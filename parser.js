@@ -49,7 +49,6 @@ function parser(json) {
   return `
   Word: <b>${json.word}</b>
   <b>${definitionCount}</b> definition(s) found for the word: <b>${json.word}</b>
-
   ${parsedHtml}`
 }
 
