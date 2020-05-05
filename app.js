@@ -144,9 +144,7 @@ bot.onText(/\/tuvan/, (msg, match) => {
           message_id: callbackQuery.message.message_id,
         };
         options_tuvan = ['prevention', 'expression', 'treatment'];
-        console.log(data)
         runSample(data).then(result => {
-          console.log(result)
           bot.sendMessage(opts.chat_id, result);
           bot.answerCallbackQuery(callbackQuery.id);
         })
