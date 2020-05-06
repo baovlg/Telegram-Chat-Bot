@@ -4,7 +4,7 @@
   "description": "Telegram Chat Bot",
   "main": "app.js",
   "scripts": {
-    "start": "serve -s build",
+    "start": "node  app.js",
     "heroku-postbuild": "npm run build"
   },
   "repository": {
