@@ -32,11 +32,11 @@ if (process.env.NODE_ENV === 'production') {
   console.log("Running in localhost");
 }
 
-// Start the server
-const server = app.listen(port, (error) => {
-  if (error) return console.log(`Error: ${error}`);
-  console.log(`Server listening on port ${server.address().port}`);
-});
+// // Start the server
+// const server = app.listen(port, (error) => {
+//   if (error) return console.log(`Error: ${error}`);
+//   console.log(`Server listening on port ${server.address().port}`);
+// });
 
 // Use Node.js body parsing middleware
 app.use(bodyParser.json());
@@ -58,7 +58,6 @@ bot.onText(/\/start/, (msg, match) => {
   );
 
   bot.on("polling_error", (err) => console.log(err));
-
 });
 
 bot.on('message', (msg) => {
@@ -106,6 +105,7 @@ bot.onText(/^([0-9])\.(.)+$/g, function (msg, match) {
     return;
   }
 
+  bot.on("polling_error", (err) => console.log(err));
 });
 
 bot.onText(/\/tuvan/, (msg, match) => {
