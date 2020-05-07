@@ -31,20 +31,20 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Start the server
-// const server = app.listen(port, (error) => {
-//   if (error) return console.log(`Error: ${error}`);
-//   console.log(`Server listening on port ${server.address().port}`);
-// });
+const server = app.listen(port, (error) => {
+  if (error) return console.log(`Error: ${error}`);
+  console.log(`Server listening on port ${server.address().port}`);
+});
 
 console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-// // Use Node.js body parsing middleware
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({
-//   extended: true,
-// }));
+// Use Node.js body parsing middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
 
-// routes(app);
+routes(app);
 
 /*-------------------------------------------------------------------------------------------------------*/
 
