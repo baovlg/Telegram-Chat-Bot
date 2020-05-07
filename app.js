@@ -25,26 +25,26 @@ let bot;
 if (process.env.NODE_ENV === 'production') {
   bot = new TelegramBot(token);
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
-  console.log("Running in Server");
 
 } else {
   bot = new TelegramBot(token, { polling: true });
-  console.log("Running in localhost");
 }
 
 // Start the server
-const server = app.listen(port, (error) => {
-  if (error) return console.log(`Error: ${error}`);
-  console.log(`Server listening on port ${server.address().port}`);
-});
+// const server = app.listen(port, (error) => {
+//   if (error) return console.log(`Error: ${error}`);
+//   console.log(`Server listening on port ${server.address().port}`);
+// });
 
-// Use Node.js body parsing middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: true,
-}));
+console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 
-routes(app);
+// // Use Node.js body parsing middleware
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({
+//   extended: true,
+// }));
+
+// routes(app);
 
 /*-------------------------------------------------------------------------------------------------------*/
 
