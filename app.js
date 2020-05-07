@@ -20,7 +20,7 @@ require('dotenv').config();
 const token = process.env.TELEGRAM_TOKEN;
 let bot;
 
-const TelegramBot = require('node-telegram-bot-api');
+// const TelegramBot = require('node-telegram-bot-api');
 // if (process.env.NODE_ENV === 'production') {
 //   bot = new TelegramBot(token);
 //   bot.setWebHook(process.env.HEROKU_URL + bot.token);
