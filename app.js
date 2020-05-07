@@ -14,20 +14,27 @@ const sessionId = uuid.v4();
 
 // Axios is a Promise based HTTP client for the browser as well as node.js. 
 const axios = require('axios');
-
-const TelegramBot = require('node-telegram-bot-api');
 const routes = require('./routes/routes')
 
 require('dotenv').config();
 const token = process.env.TELEGRAM_TOKEN;
 let bot;
 
-if (process.env.NODE_ENV === 'production') {
-  bot = new TelegramBot(token);
-  bot.setWebHook(process.env.HEROKU_URL + bot.token);
-} else {
-  bot = new TelegramBot(token, { polling: true });
-}
+const TelegramBot = require('node-telegram-bot-api');
+// if (process.env.NODE_ENV === 'production') {
+//   bot = new TelegramBot(token);
+//   bot.setWebHook(process.env.HEROKU_URL + bot.token);
+// } else {
+//   bot = new TelegramBot(token, { polling: true });
+// }
+
+var TelegramBot = require('node-telegram-bot-api'),
+  port = process.env.PORT || 443,
+  host = '0.0.0.0',  // probably this change is not required
+  externalUrl = process.env.HEROKU_URL || 'https://telegram-chat-bot-news.herokuapp.com',
+  token = process.env.TOKEN,
+  bot = new TelegramBot(process.env.TOKEN, { webHook: { port: port, host: host } });
+bot.setWebHook(externalUrl + ':443/bot' + token);
 
 // Start the server
 const server = app.listen(port, (error) => {
