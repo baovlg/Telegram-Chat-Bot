@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 // const http = require('http');
 // const server = http.createServer();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 443;
 
 // Config BodyParser to process request POST and PUT to easy
 const bodyParser = require('body-parser');
@@ -29,10 +29,10 @@ let bot;
 // }
 
 var TelegramBot = require('node-telegram-bot-api'),
-  port = process.env.PORT || 443,
+  // port = process.env.PORT || 443,
   host = '0.0.0.0',  // probably this change is not required
   externalUrl = process.env.HEROKU_URL || 'https://telegram-chat-bot-news.herokuapp.com',
-  token = process.env.TOKEN,
+  // token = process.env.TOKEN,
   bot = new TelegramBot(process.env.TOKEN, { webHook: { port: port, host: host } });
 bot.setWebHook(externalUrl + ':443/bot' + token);
 
