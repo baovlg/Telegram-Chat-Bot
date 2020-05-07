@@ -4,8 +4,9 @@
   "description": "Telegram Chat Bot",
   "main": "app.js",
   "scripts": {
-    "start": "node  app.js",
-    "heroku-postbuild": "npm run build"
+    "start": "node app.js",
+    "heroku-postbuild": "npm run build",
+    "switch_to_dev": "export $(cat .env | xargs) && wget --spider https://api.telegram.org/bot$TOKEN/setWebhook?url= --delete-after && node app.js"
   },
   "repository": {
     "type": "git",
