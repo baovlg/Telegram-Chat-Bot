@@ -47,8 +47,7 @@ module.exports = (bot) => {
 //   if (error) return console.log(`Error: ${error}`);
 //   console.log(`Server listening on port ${server.address().port}`);
 // });
-
-var server = app.listen(process.env.PORT, 'localhost', () => {
+var server = app.listen(process.env.PORT || 8080, '0.0.0.0', () => {
   const host = server.address().address;
   const port = server.address().port;
   console.log('Web server started at http://%s:%s', host, port);
