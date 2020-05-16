@@ -10,7 +10,6 @@ router.get('/', (req, res, next) => {
   });
 });
 
-
 router.post('/register', passport.authenticate('signup', { session: false }), async (req, res, next) => {
   res.json({
     message: 'Signup successful',

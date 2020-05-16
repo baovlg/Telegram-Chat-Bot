@@ -6,7 +6,7 @@ const morgan = require('morgan');
 const app = express();
 
 var mongoose = require('mongoose');
-var configDB = require('../config/database.js');
+var configDB = require('../config/database');
 
 mongoose.connect(configDB.url, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.set('useCreateIndex', true);
@@ -15,7 +15,7 @@ mongoose.Promise = global.Promise;
 
 require('./auth/auth');
 
-app.use(morgan('dev')); // sử dụng để log mọi request ra console
+app.use(morgan('dev'));
 app.use(bodyParser.json()); // Use Node.js body parsing middleware
 app.use(bodyParser.urlencoded({
   extended: true,
@@ -23,11 +23,12 @@ app.use(bodyParser.urlencoded({
 // app.use(bodyParser()); // lấy thông tin từ form HTML
 
 const routes = require('./routes/routes.js');
-const secureRoute = require('./routes/secure-routes.js');
+const user_routes = require('./controllers/UserController');
+const telegram_user_routes = require('./controllers/TelegramUserController');
 
 app.use('/', routes);
-//We plugin our jwt strategy as a middleware so only verified users can access this route
-app.use('/user', passport.authenticate('jwt', { session: false }), secureRoute);
+app.use('/users', passport.authenticate('jwt', { session: false }), user_routes);
+app.use('/telegram-users', passport.authenticate('jwt', { session: false }), telegram_user_routes);
 
 //Handle errors
 app.use(function (err, req, res, next) {
@@ -47,9 +48,11 @@ module.exports = (bot) => {
 //   if (error) return console.log(`Error: ${error}`);
 //   console.log(`Server listening on port ${server.address().port}`);
 // });
-
-
-var server = app.listen(process.env.PORT || 8080, process.env.LOCAL_ADDRESS || '0.0.0.0', () => {
+var local_address = process.env.LOCAL_ADDRESS;
+if (process.env.NODE_ENV != 'stagging') {
+  local_address = '0.0.0.0';
+}
+var server = app.listen(process.env.PORT || 8080, local_address, () => {
   const host = server.address().address;
   const port = server.address().port;
   console.log('Web server started at http://%s:%s', host, port);

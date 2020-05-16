@@ -3,11 +3,12 @@ const axios = require('axios');
 const dialogflow = require('dialogflow');
 const uuid = require('uuid');
 const sessionId = uuid.v4();
+const TelegramUserModel = require('../app/models/TelegramUser');
 
 const TelegramBot = require('node-telegram-bot-api');
 let bot;
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'stagging') {
   bot = new TelegramBot(token);
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
 }
@@ -23,10 +24,34 @@ console.log('Bot server started in the ' + process.env.NODE_ENV + ' mode');
 bot.onText(/\/start/, (msg, match) => {
   const chat_id = msg.chat.id;
   console.log(chat_id + " - " + msg.from.first_name);
+  // console.log(msg)
+
+  TelegramUserModel.find({ uid: chat_id }).exec(function (err, result) {
+    if (!err) {
+      TelegramUserModel.update({ uid: chat_id }).exec(function (err, result) {
+        if (!err) {
+          // console.log(result)
+        } else {
+          console.log('Error on update!')
+        }
+      });
+    }
+
+    else {
+      var telegram_user = new TelegramUserModel({
+        uid: msg.chat.id,
+        first_name: msg.from.first_name,
+        last_name: msg.from.last_name
+      });
+
+      telegram_user.save(function (err) { if (err) console.log('Error on save!') });
+    };
+  });
+
   bot.sendMessage(
     chat_id,
     'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?',
-  );
+  )
 
   bot.on("polling_error", (err) => console.log(err));
 });
