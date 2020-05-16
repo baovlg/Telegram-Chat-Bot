@@ -27,7 +27,7 @@ bot.onText(/\/start/, (msg, match) => {
   // console.log(msg)
 
   TelegramUserModel.find({ uid: chat_id }).exec(function (err, result) {
-    if (!err) {
+    if (!result) {
       TelegramUserModel.update({ uid: chat_id }).exec(function (err, result) {
         if (!err) {
           // console.log(result)

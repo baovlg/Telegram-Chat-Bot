@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/profile', (req, res, next) => {
-  res.status(200).res.json({
-    message: 'I did it.',
+  res.json({
+    message: 'You made it to the secure route',
     user: req.user,
     token: req.query.secret_token
   })
