@@ -1,4 +1,4 @@
 require("dotenv").config();
 
-var bot = require('./bot');
-require('./web')(bot);
+var bot = require('./config/bot');
+require('./app/web')(bot);
