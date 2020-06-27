@@ -6,6 +6,8 @@ const sessionId = uuid.v4();
 const TelegramUserModel = require('../app/models/TelegramUser');
 
 const TelegramBot = require('node-telegram-bot-api');
+const MessageModel = require('../app/models/Message');
+
 let bot;
 
 if (process.env.NODE_ENV !== 'stagging') {
@@ -27,12 +29,12 @@ bot.onText(/\/start/, (msg, match) => {
   // console.log(msg)
 
   TelegramUserModel.find({ uid: chat_id }).exec(function (err, result) {
-    if (result == undefined) {
-      TelegramUserModel.update({ uid: chat_id }).exec(function (err, result) {
+    if (result.length > 0) {
+      TelegramUserModel.updateOne({ uid: chat_id }).exec(function (err, result) {
         if (!err) {
           // console.log(result)
         } else {
-          console.log('Error on update!')
+          console.log('Error on update telegram user!')
         }
       });
     }
@@ -44,13 +46,15 @@ bot.onText(/\/start/, (msg, match) => {
         last_name: msg.from.last_name
       });
 
-      telegram_user.save(function (err) { if (err) console.log('Error on save!') });
+      telegram_user.save(function (err) { if (err) console.log('Error on save telegram user!') });
     };
   });
 
+  saveMessage(chat_id, 'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?', 1)
+
   bot.sendMessage(
     chat_id,
-    'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?',
+    'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?'
   )
 
   bot.on("polling_error", (err) => console.log(err));
@@ -68,7 +72,7 @@ bot.onText(/\/tracuu/, (msg) => {
       force_reply: true,
     },
   };
-
+  saveMessage(chat_id, "Chọn thông tin tra cứu", 1)
   bot.sendMessage(chat_id, "Chọn thông tin tra cứu", reply_options_tracuu)
   bot.on("polling_error", (err) => console.log(err));
 });
@@ -78,6 +82,17 @@ bot.onText(/^([0-9])\.(.)+$/g, function (msg, match) {
   if (match[1] == undefined)
     return;
   var choose_tracuu_id = match[1];
+
+  let mess = "";
+  if (choose_tracuu_id == 1) {
+    mess = "Ca bị nhiễm";
+  } else if (choose_tracuu_id == 2) {
+    mess = "Ca tử vong";
+  } else if (choose_tracuu_id == 3) {
+    mess = "Ca hồi phục";
+  }
+  saveMessage(chat_id, mess, 0);
+
   if (choose_tracuu_id == 1 || choose_tracuu_id == 2 || choose_tracuu_id == 3) {
     getInforAndSendMess(chat_id, choose_tracuu_id);
   } else {
@@ -106,7 +121,7 @@ bot.onText(/\/tuvan/, (msg, match) => {
       ]]
     },
   };
-
+  saveMessage(chat_id, "Chọn thông tin tư vấn", 1)
   bot.sendMessage(chat_id, "Chọn thông tin tư vấn", reply_options)
     .then(() => {
       bot.on("callback_query", (callbackQuery) => {
@@ -115,8 +130,20 @@ bot.onText(/\/tuvan/, (msg, match) => {
           chat_id: callbackQuery.message.chat.id,
           message_id: callbackQuery.message.message_id,
         };
+
+        let mess = "";
+        if (data == 'prevention') {
+          mess = "Phòng ngừa";
+        } else if (data == 'expression') {
+          mess = "Dấu hiệu";
+        } else if (data == 'treatment') {
+          mess = "Cách xử lý";
+        }
+        saveMessage(chat_id, mess, 0);
+
         // console.log(data);
         sendMessToDialogFlow(data).then(result => {
+          saveMessage(opts.chat_id, result, 1);
           bot.sendMessage(opts.chat_id, result);
           bot.answerCallbackQuery(callbackQuery.id);
         })
@@ -200,9 +227,11 @@ function getInforAndSendMess(chat_id, choose_tracuu) {
             "Số ca hồi phục ở Việt Nam: " + numberWithCommas(vietnam.recovered) + " người.";
           bot.sendMessage(chat_id, result)
         }
+        saveMessage(chat_id, result, 1)
         bot.on("polling_error", (err) => console.log(err));
         // console.log(options_tracuu[choose_tracuu]);
       } else {
+        saveMessage(chat_id, "Không lấy được dữ liệu từ Server!!", 1)
         bot.sendMessage(chat_id, "Không lấy được dữ liệu từ Server!!")
         bot.on("polling_error", (err) => console.log(err));
       }
@@ -216,6 +245,38 @@ function numberWithCommas(number) {
   var parts = number.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
+}
+
+function saveMessage(uid, text, is_bot) {
+  TelegramUserModel.find({ uid: uid }).exec(function (err, result) {
+    console.log(result[0])
+    if (result.length > 0) {
+      let telegram_user_id = result[0]._id;
+      console.log(result[0]._id)
+
+      TelegramUserModel.updateOne({ uid: uid }).exec(function (err, result) {
+        if (!err) {
+          // console.log(result)
+        } else {
+          console.log('Error on update room!')
+        }
+
+        let mess = new MessageModel({
+          telegram_user: telegram_user_id,
+          text: text,
+          is_bot: is_bot
+        });
+
+        mess.save(function (err) {
+          if (err) console.log('Error on save mess!')
+        }
+          // .catch(error => {
+          //   console.log(error);
+          // })
+        );
+      });
+    }
+  });
 }
 
 // axios.get('https://code.junookyo.xyz/api/ncov-moh/index.php?type=vn')

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+const TelegramUserSchema = new Schema({
   uid: {
     type: String,
     required: true,
@@ -28,6 +28,6 @@ const UserSchema = new Schema({
   }
 });
 
-const TelegramUserModel = mongoose.model('telegram-users', UserSchema);
+const TelegramUserModel = mongoose.model('telegram-users', TelegramUserSchema);
 
 module.exports = TelegramUserModel;

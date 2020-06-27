@@ -1,6 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const TelegramUserModel = require('../models/TelegramUser');
+const token = process.env.TELEGRAM_TOKEN;
+const uuid = require('uuid');
+const sessionId = uuid.v4();
+const TelegramBot = require('node-telegram-bot-api');
+let bot;
+
+if (process.env.NODE_ENV !== 'stagging') {
+  bot = new TelegramBot(token);
+  bot.setWebHook(process.env.HEROKU_URL + bot.token);
+}
+else {
+  bot = new TelegramBot(token, { polling: true });
+}
 
 router.post('/sendNews', (req, res, next) => {
   // console.log(req);
@@ -8,7 +21,14 @@ router.post('/sendNews', (req, res, next) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      if (result.length > 0) {
+        for (const key in result) {
+          bot.sendMessage(
+            key.uid,
+            'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?',
+          )
+        }
+      }
     }
   });
 
