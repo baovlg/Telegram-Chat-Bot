@@ -30,7 +30,8 @@ const system_routes = require('./controllers/SystemController');
 app.use('/', routes);
 app.use('/users', passport.authenticate('jwt', { session: false }), user_routes);
 // app.use('/telegram-users', passport.authenticate('jwt', { session: false }), telegram_user_routes);
-app.use('/system-routes', passport.authenticate('jwt', { session: false }), system_routes);
+// app.use('/system-routes', passport.authenticate('jwt', { session: false }), system_routes);
+app.use('/system-routes', system_routes);
 
 //Handle errors
 app.use(function (err, req, res, next) {
