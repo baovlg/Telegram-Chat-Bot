@@ -28,29 +28,7 @@ bot.onText(/\/start/, (msg, match) => {
   console.log(chat_id + " - " + msg.from.first_name);
   // console.log(msg)
 
-  TelegramUserModel.find({ uid: chat_id }).exec(function (err, result) {
-    if (result.length > 0) {
-      TelegramUserModel.updateOne({ uid: chat_id }).exec(function (err, result) {
-        if (!err) {
-          // console.log(result)
-        } else {
-          console.log('Error on update telegram user!')
-        }
-      });
-    }
-
-    else {
-      var telegram_user = new TelegramUserModel({
-        uid: msg.chat.id,
-        first_name: msg.from.first_name,
-        last_name: msg.from.last_name
-      });
-
-      telegram_user.save(function (err) { if (err) console.log('Error on save telegram user!') });
-    };
-  });
-
-  saveMessage(chat_id, 'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?', 1)
+  saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, 'Xin chào ' + msg.from.first_name + ', tôi có thể giúp gì cho bạn?', 1)
 
   bot.sendMessage(
     chat_id,
@@ -72,7 +50,7 @@ bot.onText(/\/tracuu/, (msg) => {
       force_reply: true,
     },
   };
-  saveMessage(chat_id, "Chọn thông tin tra cứu", 1)
+  saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, "Chọn thông tin tra cứu", 1)
   bot.sendMessage(chat_id, "Chọn thông tin tra cứu", reply_options_tracuu)
   bot.on("polling_error", (err) => console.log(err));
 });
@@ -91,7 +69,7 @@ bot.onText(/^([0-9])\.(.)+$/g, function (msg, match) {
   } else if (choose_tracuu_id == 3) {
     mess = "Ca hồi phục";
   }
-  saveMessage(chat_id, mess, 0);
+  saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, mess, 0);
 
   if (choose_tracuu_id == 1 || choose_tracuu_id == 2 || choose_tracuu_id == 3) {
     getInforAndSendMess(chat_id, choose_tracuu_id);
@@ -121,7 +99,7 @@ bot.onText(/\/tuvan/, (msg, match) => {
       ]]
     },
   };
-  saveMessage(chat_id, "Chọn thông tin tư vấn", 1)
+  saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, "Chọn thông tin tư vấn", 1)
   bot.sendMessage(chat_id, "Chọn thông tin tư vấn", reply_options)
     .then(() => {
       bot.on("callback_query", (callbackQuery) => {
@@ -139,11 +117,11 @@ bot.onText(/\/tuvan/, (msg, match) => {
         } else if (data == 'treatment') {
           mess = "Cách xử lý";
         }
-        saveMessage(chat_id, mess, 0);
+        saveMessage({ 'chat_id': chat_id, 'first_name': undefined, 'last_name': undefined }, mess, 0);
 
         // console.log(data);
         sendMessToDialogFlow(data).then(result => {
-          saveMessage(opts.chat_id, result, 1);
+          saveMessage({ 'chat_id': opts.chat_id, 'first_name': undefined, 'last_name': undefined }, result, 1);
           bot.sendMessage(opts.chat_id, result);
           bot.answerCallbackQuery(callbackQuery.id);
         })
@@ -227,11 +205,11 @@ function getInforAndSendMess(chat_id, choose_tracuu) {
             "Số ca hồi phục ở Việt Nam: " + numberWithCommas(vietnam.recovered) + " người.";
           bot.sendMessage(chat_id, result)
         }
-        saveMessage(chat_id, result, 1)
+        saveMessage({ 'chat_id': chat_id, 'first_name': undefined, 'last_name': undefined }, result, 1)
         bot.on("polling_error", (err) => console.log(err));
         // console.log(options_tracuu[choose_tracuu]);
       } else {
-        saveMessage(chat_id, "Không lấy được dữ liệu từ Server!!", 1)
+        saveMessage({ 'chat_id': chat_id, 'first_name': undefined, 'last_name': undefined }, "Không lấy được dữ liệu từ Server!!", 1)
         bot.sendMessage(chat_id, "Không lấy được dữ liệu từ Server!!")
         bot.on("polling_error", (err) => console.log(err));
       }
@@ -247,35 +225,62 @@ function numberWithCommas(number) {
   return parts.join(".");
 }
 
-function saveMessage(uid, text, is_bot) {
-  TelegramUserModel.find({ uid: uid }).exec(function (err, result) {
-    console.log(result[0])
+function saveMessage(msg, text, is_bot) {
+  TelegramUserModel.find({ uid: msg.chat_id }).exec(function (err, result) {
+    let telegram_user_id = undefined;
     if (result.length > 0) {
-      let telegram_user_id = result[0]._id;
-      console.log(result[0]._id)
-
-      TelegramUserModel.updateOne({ uid: uid }).exec(function (err, result) {
-        if (!err) {
-          // console.log(result)
-        } else {
-          console.log('Error on update room!')
-        }
-
-        let mess = new MessageModel({
-          telegram_user: telegram_user_id,
-          text: text,
-          is_bot: is_bot
-        });
-
-        mess.save(function (err) {
-          if (err) console.log('Error on save mess!')
-        }
-          // .catch(error => {
-          //   console.log(error);
-          // })
-        );
+      telegram_user_id = result[0]._id;
+      console.log(telegram_user_id);
+      let mess = new MessageModel({
+        telegram_user: telegram_user_id,
+        text: text,
+        is_bot: is_bot
       });
+
+      mess.save(function (err) {
+        if (err) console.log(err)
+      }
+        // .catch(error => {
+        //   console.log(error);
+        // })
+      );
+      if (msg.first_name != undefined) {
+        TelegramUserModel.updateOne({ first_name: msg.first_name, last_name: msg.last_name }).exec(function (err, result) {
+          if (!err) {
+            // console.log("result" + result)
+          } else {
+            console.log('Error on update telegram user!')
+          }
+        });
+      }
     }
+
+    else {
+      var telegram_user = new TelegramUserModel({
+        uid: msg.chat_id,
+        first_name: msg.first_name,
+        last_name: msg.last_name
+      });
+
+      telegram_user.save(function (err) { if (err) console.log('Error on save telegram user!') });
+
+      telegram_user_id = telegram_user._id;
+      console.log(telegram_user_id);
+      let mess = new MessageModel({
+        telegram_user: telegram_user_id,
+        text: text,
+        is_bot: is_bot
+      });
+
+      mess.save(function (err) {
+        if (err) console.log(err)
+      }
+        // .catch(error => {
+        //   console.log(error);
+        // })
+      );
+    }
+
   });
 }
 

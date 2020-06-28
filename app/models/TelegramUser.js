@@ -5,7 +5,7 @@ const TelegramUserSchema = new Schema({
   uid: {
     type: String,
     required: true,
-    unique: true
+    unique: false
   },
   first_name: {
     type: String,

@@ -24,13 +24,14 @@ app.use(bodyParser.urlencoded({
 
 const routes = require('./routes/routes.js');
 const user_routes = require('./controllers/UserController');
-// const telegram_user_routes = require('./controllers/TelegramUserController');
+const telegram_user_routes = require('./controllers/TelegramUserController');
 const system_routes = require('./controllers/SystemController');
 
 app.use('/', routes);
 app.use('/users', passport.authenticate('jwt', { session: false }), user_routes);
-// app.use('/telegram-users', passport.authenticate('jwt', { session: false }), telegram_user_routes);
+app.use('/telegram-users', passport.authenticate('jwt', { session: false }), telegram_user_routes);
 // app.use('/system-routes', passport.authenticate('jwt', { session: false }), system_routes);
+// app.use('/telegram-users', telegram_user_routes);
 app.use('/system-routes', system_routes);
 
 //Handle errors
