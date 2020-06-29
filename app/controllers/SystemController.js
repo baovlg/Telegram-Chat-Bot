@@ -175,6 +175,33 @@ router.get('/getHistoryNews', (req, res) => {
     }));
 });
 
+router.get('/dashBoard', (req, res) => {
+  MessageModel.find({ telegram_user: req.query.id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
+    .then(datas => {
+      // console.log(datas)
+      if (datas.length > 0) {
+        let list_telegram_user = listTelegramUser(datas);
+        let response = {
+          message: "Get data successfully!",
+          data: {
+            'user_count': list_telegram_user.length,
+            'message_count': datas.length
+          }
+          // token: req.query.secret_token
+        }
+        res.send(response);
+      }
+
+    })
+    .catch(err => res.status(200).json({
+      message: "Get data successfully!",
+      data: {
+        'user_count': 0,
+        'message_count': 0
+      }
+    }));
+
+});
 
 function formatData(inputs) {
   let result = [];
@@ -182,6 +209,18 @@ function formatData(inputs) {
     for (const iterator of inputs) {
       let action = iterator.is_bot == true ? "response" : "request";
       result.push({ telegram_user: iterator.telegram_user.first_name, text: iterator.text, datetime: iterator.createdAt, action: action })
+    }
+  }
+  return result;
+}
+
+function listTelegramUser(inputs) {
+  let result = [];
+  if (inputs.length > 0) {
+    for (const iterator of inputs) {
+      if (!result.includes(iterator.telegram_user._id)) {
+        result.push(iterator.telegram_user._id);
+      }
     }
   }
   return result;

@@ -69,6 +69,7 @@ router.post('/sendMessageById', (req, res) => {
 
           let response = {
             message: "Send message successfully!",
+            data: datas
             // token: req.query.secret_token
           }
           res.send(response);
@@ -94,7 +95,7 @@ router.post('/historyMessageById', (req, res) => {
         if (datas.length > 0) {
           datas = formatData(datas);
           let response = {
-            message: "Send message successfully!",
+            message: "Get history message successfully!",
             data: datas
             // token: req.query.secret_token
           }
