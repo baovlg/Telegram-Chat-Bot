@@ -176,7 +176,7 @@ router.get('/getHistoryNews', (req, res) => {
 });
 
 router.get('/dashBoard', (req, res) => {
-  MessageModel.find({ telegram_user: req.query.id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
+  MessageModel.find({}, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
     .then(datas => {
       // console.log(datas)
       if (datas.length > 0) {
