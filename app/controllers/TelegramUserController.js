@@ -45,23 +45,20 @@ router.post('/sendMessageById', (req, res) => {
             .then(response => {
               // We get here if the message was successfully posted
               console.log('Message posted')
-              res.end('OK')
-            })
-            .catch(err => {
-              // ...and here if it was not
-              console.log('Error :', err)
-              res.end('Error :' + err)
-            })
+              let mess = new MessageModel({
+                telegram_user: req.query.id,
+                text: req.query.message,
+                is_bot: true
+              });
 
-          let mess = new MessageModel({
-            telegram_user: req.query.id,
-            text: req.query.message,
-            is_bot: true
-          });
+              mess.save(function (err) {
+                if (err) console.log(err)
+              }
+                // .catch(error => {
+                //   console.log(error);
+                // })
+              );
 
-          mess.save(function (err) {
-            if (err) console.log(err)
-            else {
               MessageModel.find({}, function (err, result) {
                 let response = {
                   message: "Send message successfully!",
@@ -70,12 +67,13 @@ router.post('/sendMessageById', (req, res) => {
                 }
                 res.send(response);
               })
-            }
-          }
-            // .catch(error => {
-            //   console.log(error);
-            // })
-          );
+              // res.end('OK')
+            })
+            .catch(err => {
+              // ...and here if it was not
+              console.log('Error :', err)
+              res.end('Error :' + err)
+            })
         }
       })
       .catch(err => res.status(400).json(err));
