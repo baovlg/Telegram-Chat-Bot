@@ -67,12 +67,14 @@ router.post('/sendMessageById', (req, res) => {
             // })
           );
 
-          let response = {
-            message: "Send message successfully!",
-            data: datas
-            // token: req.query.secret_token
-          }
-          res.send(response);
+          MessageModel.find({}, function (err, result) {
+            let response = {
+              message: "Send message successfully!",
+              data: result
+              // token: req.query.secret_token
+            }
+            res.send(response);
+          })
         }
 
       })
