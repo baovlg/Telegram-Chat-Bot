@@ -3,83 +3,30 @@ const router = express.Router();
 const axios = require('axios')
 const TelegramUserModel = require('../models/TelegramUser');
 
-router.post('/sendNews', (req, res) => {
+router.get('/getListTelegramUser', (req, res) => {
   // console.log(req);
-  TelegramUserModel.find({ is_receive_news: true }, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      if (result.length > 0) {
-        for (const key of result) {
-          axios
-            .post(
-              'https://api.telegram.org/bot1239970044:AAFG7aUPL5i9lPMMCk-m2_pkiOdjemZMs3I/sendMessage',
-              {
-                chat_id: key.uid,
-                text: req.query.message
-              }
-            )
-            .then(response => {
-              // We get here if the message was successfully posted
-              console.log('Message posted')
-              res.end('OK')
-            })
-            .catch(err => {
-              // ...and here if it was not
-              console.log('Error :', err)
-              res.end('Error :' + err)
-            })
+  var is_have_data = false;
+  TelegramUserModel.find({}, function (err, result) { })
+    .then(datas => {
+      if (datas.length > 0) {
+        let response = {
+          message: "Get list telegram user successfully!",
+          data: datas,
+          count: datas.length
+          // token: req.query.secret_token
         }
+        console.log(response)
+        res.send(response);
       }
-    }
-  });
 
-  res.status(200).json({
-    message: "Send news successfully",
-    // message: req.query.message,
-    // user: req.user,
-    // token: req.query.secret_token
-  });
+    })
+    .catch(err => res.status(200).json({
+      message: "Get list telegram user successfully!",
+      data: [],
+      count: 0
+      // token: req.query.secret_token
 
-});
-
-router.post('/getListTelegramUser', (req, res) => {
-  // console.log(req);
-  TelegramUserModel.find({}, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      if (result.length > 0) {
-        for (const key of result) {
-          axios
-            .post(
-              'https://api.telegram.org/bot1239970044:AAFG7aUPL5i9lPMMCk-m2_pkiOdjemZMs3I/sendMessage',
-              {
-                chat_id: key.uid,
-                text: req.query.message
-              }
-            )
-            .then(response => {
-              // We get here if the message was successfully posted
-              console.log('Message posted')
-              res.end('OK')
-            })
-            .catch(err => {
-              // ...and here if it was not
-              console.log('Error :', err)
-              res.end('Error :' + err)
-            })
-        }
-      }
-    }
-  });
-
-  res.status(200).json({
-    message: "Get list telegram user successfully!",
-    // user: req.user,
-    // token: req.query.secret_token
-  });
-
+    }));
 });
 
 function formatData(inputs) {
