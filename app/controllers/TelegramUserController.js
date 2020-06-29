@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios')
 const TelegramUserModel = require('../models/TelegramUser');
+const MessageModel = require('../models/Message');
 
 router.get('/getListTelegramUser', (req, res) => {
   // console.log(req);
@@ -15,7 +16,6 @@ router.get('/getListTelegramUser', (req, res) => {
           count: datas.length
           // token: req.query.secret_token
         }
-        console.log(response)
         res.send(response);
       }
 
@@ -27,6 +27,51 @@ router.get('/getListTelegramUser', (req, res) => {
       // token: req.query.secret_token
 
     }));
+});
+
+router.post('/sendMessageById', (req, res) => {
+  if (req.query.id != undefined) {
+    MessageModel.find({ telegram_user: req.query.id }, function (err, result) { })
+      .then(datas => {
+        // console.log(datas)
+        if (datas.length > 0) {
+          axios
+            .post(
+              'https://api.telegram.org/bot1239970044:AAFG7aUPL5i9lPMMCk-m2_pkiOdjemZMs3I/sendMessage',
+              {
+                chat_id: datas.uid,
+                text: req.query.message
+              }
+            )
+            .then(response => {
+              // We get here if the message was successfully posted
+              console.log('Message posted')
+              res.end('OK')
+            })
+            .catch(err => {
+              // ...and here if it was not
+              console.log('Error :', err)
+              res.end('Error :' + err)
+            })
+
+        }
+
+        let response = {
+          message: "Get list telegram user successfully!",
+          // token: req.query.secret_token
+        }
+        console.log(response)
+        res.send(response);
+      })
+      .catch(err => res.status(400).json(err));
+
+  } else {
+    res.status(400).json({
+      message: "id not find",
+      // user: req.user,
+      // token: req.query.secret_token
+    });
+  }
 });
 
 function formatData(inputs) {
