@@ -30,9 +30,9 @@ router.get('/getListTelegramUser', (req, res) => {
 
 router.post('/sendMessageById', (req, res) => {
   if (req.query.id != undefined) {
-    MessageModel.find({ telegram_user: req.query.id }, function (err, result) { })
+    TelegramUserModel.find({ _id: req.query.id }, function (err, result) { })
       .then(datas => {
-        // console.log(datas)
+        console.log(datas)
         if (datas.length > 0) {
           axios
             .post(
@@ -53,14 +53,54 @@ router.post('/sendMessageById', (req, res) => {
               res.end('Error :' + err)
             })
 
+          let mess = new MessageModel({
+            telegram_user: req.query.id,
+            text: req.query.message,
+            is_bot: true
+          });
+
+          mess.save(function (err) {
+            if (err) console.log(err)
+          }
+            // .catch(error => {
+            //   console.log(error);
+            // })
+          );
+
+          let response = {
+            message: "Send message successfully!",
+            // token: req.query.secret_token
+          }
+          res.send(response);
         }
 
-        let response = {
-          message: "Send message successfully!",
-          // token: req.query.secret_token
+      })
+      .catch(err => res.status(400).json(err));
+
+  } else {
+    res.status(400).json({
+      message: "id not find",
+      // user: req.user,
+      // token: req.query.secret_token
+    });
+  }
+});
+
+router.post('/historyMessageById', (req, res) => {
+  if (req.query.id != undefined) {
+    MessageModel.find({ telegram_user: req.query.id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
+      .then(datas => {
+        // console.log(datas)
+        if (datas.length > 0) {
+          datas = formatData(datas);
+          let response = {
+            message: "Send message successfully!",
+            data: datas
+            // token: req.query.secret_token
+          }
+          res.send(response);
         }
-        console.log(response)
-        res.send(response);
+
       })
       .catch(err => res.status(400).json(err));
 

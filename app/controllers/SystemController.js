@@ -3,6 +3,8 @@ const router = express.Router();
 const nodeXlsx = require('node-xlsx');
 const TelegramUserModel = require('../models/TelegramUser');
 const MessageModel = require('../models/Message');
+const NewsModel = require('../models/News');
+
 const axios = require('axios')
 
 router.post('/sendNews', (req, res) => {
@@ -31,7 +33,33 @@ router.post('/sendNews', (req, res) => {
               console.log('Error :', err)
               res.end('Error :' + err)
             })
+
+          let mess = new MessageModel({
+            telegram_user: key._id,
+            text: req.query.message,
+            is_bot: true
+          });
+
+          mess.save(function (err) {
+            if (err) console.log(err)
+          }
+            // .catch(error => {
+            //   console.log(error);
+            // })
+          );
+
         }
+        let news = new NewsModel({
+          text: req.query.message
+        });
+
+        news.save(function (err) {
+          if (err) console.log(err)
+        }
+          // .catch(error => {
+          //   console.log(error);
+          // })
+        );
       }
     }
   });
@@ -121,6 +149,30 @@ router.post('/exportDownloadById', function (req, res) {
     });
   }
 
+});
+
+router.get('/getHistoryNews', (req, res) => {
+  // console.log(req);
+  NewsModel.find({}, function (err, result) { })
+    .then(datas => {
+      if (datas.length > 0) {
+        let response = {
+          message: "Get history news successfully!",
+          data: datas,
+          count: datas.length
+          // token: req.query.secret_token
+        }
+        res.send(response);
+      }
+
+    })
+    .catch(err => res.status(200).json({
+      message: "Get history news successfully!",
+      data: [],
+      count: 0
+      // token: req.query.secret_token
+
+    }));
 });
 
 
