@@ -61,24 +61,22 @@ router.post('/sendMessageById', (req, res) => {
 
           mess.save(function (err) {
             if (err) console.log(err)
+            else {
+              MessageModel.find({}, function (err, result) {
+                let response = {
+                  message: "Send message successfully!",
+                  data: result
+                  // token: req.query.secret_token
+                }
+                res.send(response);
+              })
+            }
           }
             // .catch(error => {
             //   console.log(error);
             // })
-          ).then(
-            MessageModel.find({}, function (err, result) {
-              let response = {
-                message: "Send message successfully!",
-                data: result
-                // token: req.query.secret_token
-              }
-              res.send(response);
-            })
           );
-
-
         }
-
       })
       .catch(err => res.status(400).json(err));
 
