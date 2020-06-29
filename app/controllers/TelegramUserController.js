@@ -6,7 +6,6 @@ const MessageModel = require('../models/Message');
 
 router.get('/getListTelegramUser', (req, res) => {
   // console.log(req);
-  var is_have_data = false;
   TelegramUserModel.find({}, function (err, result) { })
     .then(datas => {
       if (datas.length > 0) {
@@ -39,7 +38,7 @@ router.post('/sendMessageById', (req, res) => {
             .post(
               'https://api.telegram.org/bot1239970044:AAFG7aUPL5i9lPMMCk-m2_pkiOdjemZMs3I/sendMessage',
               {
-                chat_id: datas.uid,
+                chat_id: datas[0].uid,
                 text: req.query.message
               }
             )
@@ -57,7 +56,7 @@ router.post('/sendMessageById', (req, res) => {
         }
 
         let response = {
-          message: "Get list telegram user successfully!",
+          message: "Send message successfully!",
           // token: req.query.secret_token
         }
         console.log(response)
