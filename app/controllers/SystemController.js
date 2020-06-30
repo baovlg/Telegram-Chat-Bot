@@ -108,7 +108,7 @@ router.get('/exportDownload', function (req, res) {
 });
 
 //////////////////////////////////////////////////////////
-router.post('/exportDownloadById', function (req, res) {
+router.get('/exportDownloadById', function (req, res) {
   let dataExcel = [];
   if (req.query.id != undefined) {
     MessageModel.find({ telegram_user: req.query.id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
