@@ -126,11 +126,28 @@ bot.onText(/\/tuvan/, (msg, match) => {
           bot.answerCallbackQuery(callbackQuery.id);
         })
           .catch(error => {
-            bot.sendMessage(opts.chat_id, 'Not found');
+            bot.sendMessage(opts.chat_id, 'Not connecting to Dialogflow Server');
             bot.answerCallbackQuery(callbackQuery.id);
           });
       });
     });
+});
+
+bot.onText(/[\w\d]+/, (msg, match) => {
+  const chat_id = msg.chat.id;
+
+  // saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 0)
+
+  sendMessToDialogFlow(msg.text).then(result => {
+    // saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 1)
+    bot.sendMessage(chat_id, result);
+  })
+    .catch(error => {
+      bot.sendMessage(chat_id, 'Not connecting to Dialogflow Server');
+      console.log(error)
+    });
+
+  bot.on("polling_error", (err) => console.log(err));
 });
 
 /*-------------------------------------------------------------------------------------------------------*/
@@ -230,7 +247,7 @@ function saveMessage(msg, text, is_bot) {
     let telegram_user_id = undefined;
     if (result.length > 0) {
       telegram_user_id = result[0]._id;
-      console.log(telegram_user_id);
+      // console.log(telegram_user_id);
       let mess = new MessageModel({
         telegram_user: telegram_user_id,
         text: text,
