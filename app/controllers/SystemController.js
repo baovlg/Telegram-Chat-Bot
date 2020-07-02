@@ -73,7 +73,6 @@ router.post('/sendNews', (req, res) => {
 
 });
 
-// Khi client truy cập router này thì server sẽ export ngay file excel xuống client
 router.get('/exportDownload', function (req, res) {
   let dataExcel = [];
   MessageModel.find({}, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
@@ -107,7 +106,6 @@ router.get('/exportDownload', function (req, res) {
     .catch(err => res.status(400).json(err));
 });
 
-//////////////////////////////////////////////////////////
 router.get('/exportDownloadById', function (req, res) {
   let dataExcel = [];
   if (req.query.id != undefined) {
