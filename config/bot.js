@@ -124,6 +124,7 @@ bot.onText(/\/tuvan/, (msg, match) => {
           saveMessage({ 'chat_id': opts.chat_id, 'first_name': undefined, 'last_name': undefined }, result, 1);
           bot.sendMessage(opts.chat_id, result);
           bot.answerCallbackQuery(callbackQuery.id);
+
         })
           .catch(error => {
             bot.sendMessage(opts.chat_id, 'Not connecting to Dialogflow Server');
@@ -133,21 +134,24 @@ bot.onText(/\/tuvan/, (msg, match) => {
     });
 });
 
-bot.onText(/[\w\d]+/, (msg, match) => {
+bot.onText(/\w+[\d]+/, (msg, match) => {
   const chat_id = msg.chat.id;
 
-  // saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 0)
+  if (msg.text != undefined) {
+    saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 0)
 
-  sendMessToDialogFlow(msg.text).then(result => {
-    // saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 1)
-    bot.sendMessage(chat_id, result);
-  })
-    .catch(error => {
-      bot.sendMessage(chat_id, 'Not connecting to Dialogflow Server');
-      console.log(error)
-    });
+    sendMessToDialogFlow(msg.text).then(result => {
+      saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 1)
+      bot.sendMessage(chat_id, result);
+    })
+      .catch(error => {
+        bot.sendMessage(chat_id, 'Not connecting to Dialogflow Server');
+        console.log(error)
+      });
 
-  bot.on("polling_error", (err) => console.log(err));
+    bot.on("polling_error", (err) => console.log(err));
+  }
+
 });
 
 /*-------------------------------------------------------------------------------------------------------*/
