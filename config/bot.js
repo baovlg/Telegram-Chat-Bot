@@ -134,10 +134,10 @@ bot.onText(/\/tuvan/, (msg, match) => {
     });
 });
 
-bot.onText(/\w+[\d]+/, (msg, match) => {
+bot.onText(/[\w\d]+/, (msg, match) => {
   const chat_id = msg.chat.id;
 
-  if (msg.text != undefined) {
+  if (msg.text != undefined && match[0] != '1' && match[0] != '2' && match[0] != '3') {
     saveMessage({ 'chat_id': chat_id, 'first_name': msg.from.first_name, 'last_name': msg.from.last_name }, msg.text, 0)
 
     sendMessToDialogFlow(msg.text).then(result => {
