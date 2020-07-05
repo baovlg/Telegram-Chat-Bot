@@ -74,49 +74,59 @@ router.post('/sendNews', (req, res) => {
 });
 
 router.get('/exportDownload', function (req, res) {
-  // let dataExcel = [];
-  // MessageModel.find({}, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
-  //   .then(datas => {
-  //     // console.log(datas)
-  //     datas, telegram_user_names = formatData(datas);
-  //     // console.log(datas)
-  //     console.log(telegram_user_names)
+  TelegramUserModel.find({})
+    .then(data => {
+      var messsage_datas = [];
+      let count = 0;
+      for (const dt of data) {
+        count++;
+        MessageModel.find({ telegram_user: dt._id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
+          .then(datas => {
+            messsage_datas.push(datas)
+            if (messsage_datas.length == count) {
+              var result = [];
+              for (const messsage_data of messsage_datas) {
+                let data;
+                data = formatData(messsage_data);
+                result.push(data);
+                // console.log(datas)
+              }
 
-  //     // Lay du lieu header cho file excel <=> lay cac key name trong collection
-  //     let arrHeaderTitle = [];
+              if (result.length > 0) {
+                let excel_data = [];
+                for (const iterator of result) {
+                  let dataExcel = [];
+                  let arrHeaderTitle = [];
 
-  //     Object.keys(datas[0]).forEach(key => {
-  //       arrHeaderTitle.push(key);
-  //     });
+                  Object.keys(iterator.messages[0]).forEach(key => {
+                    arrHeaderTitle.push(key);
+                  });
 
-  //     dataExcel.push(arrHeaderTitle);  // push header vao mang dataExcel
+                  // Lay du lieu header cho file excel <=> lay cac key name trong collection
 
-  //     // Lay du lieu cac row tuong ung voi header <=> lay cac value tuong ung voi key name o tren
-  //     for (let item of datas) {
-  //       let rowItemValue = [];
-  //       Object.keys(item).forEach(key => {
-  //         rowItemValue.push(item[key]);
-  //       });
-  //       dataExcel.push(rowItemValue); // push tung dong value vao mang dataExcel
-  //     }
+                  dataExcel.push(arrHeaderTitle);  // push header vao mang dataExcel
 
+                  // Lay du lieu cac row tuong ung voi header <=> lay cac value tuong ung voi key name o tren
+                  for (let item of iterator.messages) {
+                    let rowItemValue = [];
+                    Object.keys(item).forEach(key => {
+                      rowItemValue.push(item[key]);
+                    });
+                    dataExcel.push(rowItemValue); // push tung dong value vao mang dataExcel
+                  }
+                  excel_data.push({ name: iterator.telegram_user_name, data: dataExcel });
+                }
+                // console.log({ result })
+                let buffer = nodeXlsx.build(excel_data); // Returns a buffer
+                res.attachment('message-database.xlsx');
+                res.send(buffer);
+              }
+            }
+          })
+      }
+    })
+    .catch(err => res.status(400).json(err));
 
-  //     let buffer = nodeXlsx.build([{ name: "List User", data: dataExcel }, { name: "mySecondSheet", data: dataExcel }]); // Returns a buffer
-
-  //     res.attachment('message-database.xlsx');
-  //     res.send(buffer);
-  //   })
-  //   .catch(err => res.status(400).json(err));
-
-
-  let ArraydataExcel = [];
-  var telegram_user = TelegramUserModel.find({});
-  if (telegram_user.length > 0) {
-    console.log(telegram_user)
-  }
-  // for () {
-
-  // }
   // MessageModel.find({}, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
   //   .then(datas => {
   //     // console.log(datas)
@@ -157,20 +167,20 @@ router.get('/exportDownloadById', function (req, res) {
     MessageModel.find({ telegram_user: req.query.id }, { '_id': 0, 'text': 1, 'createdAt': 1, 'is_bot': 1 }, {}).populate('telegram_user', { '_id': 0, 'first_name': 1 })
       .then(datas => {
         // console.log(datas)
-        datas, telegram_user_names = formatData(datas);
+        datas = formatData(datas);
         // console.log(datas)
 
         // Lay du lieu header cho file excel <=> lay cac key name trong collection
         let arrHeaderTitle = [];
 
-        Object.keys(datas[0]).forEach(key => {
+        Object.keys(datas.messages[0]).forEach(key => {
           arrHeaderTitle.push(key);
         });
 
         dataExcel.push(arrHeaderTitle);  // push header vao mang dataExcel
 
         // Lay du lieu cac row tuong ung voi header <=> lay cac value tuong ung voi key name o tren
-        for (let item of datas) {
+        for (let item of datas.messages) {
           let rowItemValue = [];
           Object.keys(item).forEach(key => {
             rowItemValue.push(item[key]);
@@ -178,7 +188,7 @@ router.get('/exportDownloadById', function (req, res) {
           dataExcel.push(rowItemValue); // push tung dong value vao mang dataExcel
         }
 
-        let buffer = nodeXlsx.build([{ name: telegram_user_names.length > 0 ? telegram_user_names[0] + "' messages" : "messages", data: dataExcel }]); // Returns a buffer
+        let buffer = nodeXlsx.build([{ name: datas.telegram_user_name != "" ? datas.telegram_user_name + "' messages" : "messages", data: dataExcel }]); // Returns a buffer
         res.attachment('message-database.xlsx');
         res.send(buffer);
       })
@@ -248,21 +258,23 @@ router.get('/dashBoard', (req, res) => {
 });
 
 function formatData(inputs) {
-  let result = [];
-  var telegram_user_names = [];
+  let messages = [];
+  let telegram_user_name = "";
+  let result;
   if (inputs.length > 0) {
     for (const iterator of inputs) {
-      let telegram_user_name = iterator.is_bot == true ? "Bot" : iterator.telegram_user.first_name;
-      if (!telegram_user_names.includes(iterator.telegram_user.first_name)) {
-        telegram_user_names.push(iterator.telegram_user.first_name);
-      }
+      let name = iterator.is_bot == true ? "Bot" : iterator.telegram_user.first_name;
       var dt = new Date(iterator.createdAt);
       var dt_format = dt.toString('en-US', { timeZone: 'Asia/Bangkok' })
       // console.log(dt_format);
-      result.push({ telegram_user: telegram_user_name, context: iterator.text, datetime: dt_format })
+      messages.push({ user: name, context: iterator.text, datetime: dt_format })
+      telegram_user_name = iterator.telegram_user.first_name;
     }
   }
-  return result, telegram_user_names;
+  result = { "telegram_user_name": telegram_user_name, "messages": messages };
+  // console.log({ result });
+
+  return result;
 }
 
 function listTelegramUser(inputs) {
